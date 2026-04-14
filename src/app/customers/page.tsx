@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import {
   Pin,
   PinOff,
@@ -41,9 +43,9 @@ const T = {
 const sideMenuItems = [
   { label: "客戶管理摘要", group: 1 },
   { label: "客戶組成", group: 1 },
-  { label: "所有客戶", group: 2, active: true },
+  { label: "所有客戶", group: 2, active: true, href: "/customers" },
   { label: "專案經營名單", group: 2 },
-  { label: "我的自建組合", group: 2 },
+  { label: "我的自建組合", group: 2, href: "/portfolio" },
   { label: "近期接觸機會", group: 2 },
   { label: "所有保單", group: 3 },
   { label: "案件處理進度", group: 3 },
@@ -133,19 +135,9 @@ function AppHeader() {
       <div className="flex items-center h-[56px] pl-5 pr-1 py-2">
         {/* Logo */}
         <div className="flex items-center gap-2 shrink-0 mr-4">
-          {/* 以文字替代圖片 Logo（Figma 圖片資產有效期 7 天） */}
-          <div
-            className="flex items-center justify-center rounded text-xs font-bold text-white px-2 py-1"
-            style={{ backgroundColor: T.primary }}
-          >
-            南山
-          </div>
-          <span
-            className="text-sm font-semibold"
-            style={{ color: T.textDefault, fontFamily: "'PingFang TC', sans-serif" }}
-          >
-            人壽地
-          </span>
+          <Link href="/customers">
+            <Image src="/logo.svg" alt="南山人園地" width={120} height={30} priority />
+          </Link>
         </div>
 
         {/* 導覽連結 */}
@@ -212,19 +204,27 @@ function SideMenu() {
             )}
             {sideMenuItems
               .filter((item) => item.group === group)
-              .map((item) => (
-                <button
-                  key={item.label}
-                  className="flex items-center gap-2 w-full h-[48px] px-2 rounded text-[16px] font-semibold text-left"
-                  style={{
-                    backgroundColor: item.active ? T.primary : "transparent",
-                    color: item.active ? T.textWhite : T.textDefault,
-                    fontFamily: "'PingFang TC', sans-serif",
-                  }}
-                >
-                  <span className="truncate">{item.label}</span>
-                </button>
-              ))}
+              .map((item) => {
+                const inner = (
+                  <span
+                    className="flex items-center gap-2 w-full h-[48px] px-2 rounded text-[16px] font-semibold text-left"
+                    style={{
+                      backgroundColor: item.active ? T.primary : "transparent",
+                      color: item.active ? T.textWhite : T.textDefault,
+                      fontFamily: "'PingFang TC', sans-serif",
+                    }}
+                  >
+                    <span className="truncate">{item.label}</span>
+                  </span>
+                );
+                return item.href ? (
+                  <Link key={item.label} href={item.href} style={{ display: "block" }}>
+                    {inner}
+                  </Link>
+                ) : (
+                  <button key={item.label} className="w-full">{inner}</button>
+                );
+              })}
           </div>
         ))}
       </div>

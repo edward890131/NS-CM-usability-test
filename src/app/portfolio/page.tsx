@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Plus, ArrowLeft, Search, Pin, ChevronDown, ChevronUp,
   Users, CheckCircle, X, MoreHorizontal, Pencil, Eye,
@@ -159,9 +160,9 @@ function SideMenu() {
     { label: "客戶管理摘要" },
     { label: "客戶組成" },
     null, // 分隔線
-    { label: "所有客戶" },
+    { label: "所有客戶", href: "/customers" },
     { label: "專案經營名單" },
-    { label: "我的自建組合", active: true },
+    { label: "我的自建組合", active: true, href: "/portfolio" },
     { label: "近期接觸機會" },
     null,
     { label: "所有保單" },
@@ -180,12 +181,24 @@ function SideMenu() {
         {items.map((item, i) =>
           item === null ? (
             <div key={i} style={{ height: 16, borderBottom: `1px solid ${T.borderLow}`, margin: "4px 0 8px" }} />
+          ) : item.href ? (
+            <Link key={item.label} href={item.href} style={{ textDecoration: "none" }}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                height: 48, padding: "0 8px", borderRadius: 4,
+                background: item.active ? T.primary : "transparent",
+                color: item.active ? T.white : T.textDefault,
+                fontWeight: 600, fontSize: 16, cursor: "pointer",
+              }}>
+                {item.label}
+              </div>
+            </Link>
           ) : (
             <div key={item.label} style={{
               display: "flex", alignItems: "center", gap: 8,
               height: 48, padding: "0 8px", borderRadius: 4,
-              background: item.active ? T.primary : "transparent",
-              color: item.active ? T.white : T.textDefault,
+              background: "transparent",
+              color: T.textDefault,
               fontWeight: 600, fontSize: 16, cursor: "pointer",
             }}>
               {item.label}
