@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Design System",
-  description: "Yuu 的 Design System — 基於 shadcn/ui",
+  title: "南山客戶管理平台測試站",
+  description: "顧名思義就是一個拿來測試用的網站",
 };
 
 export default function RootLayout({
