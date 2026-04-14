@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="157" height="40" viewBox="0 0 157 40">
+  <!-- Mountain gradient icon -->
+  <defs>
+    <linearGradient id="mtGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4aab3c"/>
+      <stop offset="50%" style="stop-color:#0085c7"/>
+      <stop offset="100%" style="stop-color:#005b9a"/>
+    </linearGradient>
+  </defs>
+  <!-- Mountain shape -->
+  <polygon points="4,34 18,10 24,20 30,8 40,34" fill="url(#mtGrad)" rx="2"/>
+  <!-- Snow cap -->
+  <polygon points="27,8 30,8 28,14" fill="white" opacity="0.9"/>
+  <!-- Sun arc -->
+  <path d="M4,14 Q8,6 14,8" stroke="#f5c518" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Text: 南山人園地 -->
+  <text x="48" y="26" font-family="'PingFang TC', 'Noto Sans TC', sans-serif" font-size="16" font-weight="600" fill="#006FBC" letter-spacing="1">南山人園地</text>
+</svg>
