@@ -543,12 +543,13 @@ function CustomerTable() {
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-1">
                         <CustomerTag type={customer.tagType} />
-                        <span
-                          className="font-medium whitespace-nowrap"
-                          style={{ fontFamily: "'PingFang TC', sans-serif" }}
+                        <Link
+                          href={`/customers/${customer.id}`}
+                          className="font-medium whitespace-nowrap hover:underline"
+                          style={{ fontFamily: "'PingFang TC', sans-serif", color: T.primary }}
                         >
                           {customer.name}
-                        </span>
+                        </Link>
                       </div>
                       {customer.subtitle && (
                         <span
