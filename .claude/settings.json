@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(vercel --version)",
-      "Bash(rsync -av --exclude='node_modules' --exclude='.next' --exclude='.git' --exclude='.vercel' \"/Users/goons/Downloads/CC Test/design-system/\" \"/Users/goons/Downloads/yuu-agent/Product/NS-test/\")"
+      "Bash(rsync -av --exclude='node_modules' --exclude='.next' --exclude='.git' --exclude='.vercel' \"/Users/goons/Downloads/CC Test/design-system/\" \"/Users/goons/Downloads/yuu-agent/Product/NS-test/\")",
+      "Bash(kill -9 59571 75605)",
+      "Bash(xargs -I{} lsof -p {})",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)"
     ]
   }
 }

@@ -670,7 +670,22 @@ function InputView({
           {/* 標題列：缺口金額 + 展開按鈕 */}
           <div
             className="flex items-center justify-between px-4 py-3"
-            style={{ backgroundColor: T.primaryLight }}
+            style={{
+              backgroundColor: T.primaryLight,
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor: "rgba(0, 111, 188, 1)",
+              borderTopWidth: 0,
+              borderTopStyle: "none",
+              borderTopColor: "rgba(0, 0, 0, 0)",
+              borderRightWidth: 0,
+              borderRightStyle: "none",
+              borderRightColor: "rgba(0, 0, 0, 0)",
+              borderLeftWidth: 0,
+              borderLeftStyle: "none",
+              borderLeftColor: "rgba(0, 0, 0, 0)",
+              borderBottomColor: "rgba(0, 111, 188, 0.1)",
+            }}
           >
             <span className="text-[15px]" style={{ color: T.textDefault }}>
               距離下一級還差{" "}
@@ -692,6 +707,9 @@ function InputView({
       )}
 
       {/* ── 主約卡片清單 ── */}
+      <div className="text-[15px] font-semibold" style={{ color: T.textDefault }}>
+        輸入資訊開始試算：
+      </div>
       <div className="flex flex-col gap-4">
         {policies.map((pol, idx) => (
           <PolicyCard
@@ -712,7 +730,7 @@ function InputView({
       <button
         className="w-full h-[44px] rounded-[6px] text-[15px] font-semibold flex items-center justify-center gap-1"
         style={{
-          border: `1px dashed ${T.primary}`,
+          border: `1px solid ${T.primary}`,
           color: T.primary,
           backgroundColor: T.white,
         }}
@@ -917,9 +935,12 @@ function GapBreakdownTable({ gap }: { gap: number }) {
       <p className="text-[14px] mb-3" style={{ color: T.textMedium }}>
         如果要升等，新約保單的資格保費需超過：
       </p>
-      <div className="grid grid-cols-2 gap-4">
+      <div
+        className="grid grid-cols-2 gap-4"
+        style={{ padding: 12, backgroundColor: T.white, borderRadius: 4 }}
+      >
         {/* A&H */}
-        <div>
+        <div style={{ paddingRight: 8 }}>
           <div
             className="text-[14px] font-semibold mb-2"
             style={{ color: T.textDefault }}
@@ -940,7 +961,7 @@ function GapBreakdownTable({ gap }: { gap: number }) {
           </table>
         </div>
         {/* 其他商品 */}
-        <div>
+        <div style={{ borderLeft: "1px solid rgba(60, 60, 60, 0.1)", paddingLeft: 16 }}>
           <div
             className="text-[14px] font-semibold mb-2"
             style={{ color: T.textDefault }}
@@ -1090,7 +1111,7 @@ function PolicyCard({
     padding: "0 10px",
     fontSize: 15,
     color: disabled ? T.textDisabled : T.textDefault,
-    backgroundColor: disabled ? T.bgLight : T.white,
+    backgroundColor: disabled ? T.borderLow : T.white,
     width: "100%",
     fontFamily: "'PingFang TC', sans-serif",
     outline: "none",
@@ -1099,7 +1120,7 @@ function PolicyCard({
   return (
     <div
       className="rounded-[8px] px-4 py-4 flex flex-col gap-4"
-      style={{ border: `1px solid ${T.borderLow}`, backgroundColor: T.white }}
+      style={{ border: `1px solid ${T.borderLow}`, backgroundColor: T.bgLight }}
     >
       {/* 標題 + 刪除 */}
       <div className="flex items-center justify-between">
@@ -1180,11 +1201,23 @@ function PolicyCard({
         {/* 幣別（disabled） */}
         <div className="flex flex-col gap-1">
           <label className="text-[13px] font-semibold" style={{ color: T.textDefault }}>幣別</label>
-          <input
-            disabled
-            value={pol.currencyLabel}
-            style={inputStyle(true)}
-          />
+          <div className="relative">
+            <select
+              value={pol.currency}
+              disabled={!pol.productId}
+              style={{ ...inputStyle(!pol.productId), paddingRight: 28, appearance: "none" }}
+            >
+              <option value="">{pol.productId ? "請選擇幣別" : ""}</option>
+              {pol.currency && (
+                <option value={pol.currency}>{pol.currencyLabel}</option>
+              )}
+            </select>
+            <ChevronDown
+              size={16}
+              className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: T.textMedium }}
+            />
+          </div>
         </div>
       </div>
 
