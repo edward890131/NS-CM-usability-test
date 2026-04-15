@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronDown, ChevronUp, Trash2, Check, ArrowRight } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Trash2, Check, ArrowRight, Info } from "lucide-react";
 
 // ── 設計 Token ──────────────────────────────────────────────
 const T = {
@@ -909,11 +909,16 @@ function ResultView({
         <table className="w-full border-collapse text-[14px]">
           <thead>
             <tr style={{ backgroundColor: T.bgTableHeader }}>
-              {["商品名稱", "年期", "年繳/躉繳保費", "匯率", "商品類型權數", "商品年期權數", "資格保費"].map((h) => (
+              {["商品名稱", "年期", "年繳/躉繳保費", "匯率", "商品類型權數", "商品年期權數", "資格保費"].map((h, hIdx) => (
                 <th
                   key={h}
                   className="px-3 py-2 text-left font-semibold whitespace-nowrap"
-                  style={{ color: T.textDark, borderBottom: `1px solid ${T.borderLow}` }}
+                  style={{
+                    color: T.textDark,
+                    borderBottom: `1px solid ${T.borderLow}`,
+                    // 第一欄以外加直行分隔線
+                    borderLeft: hIdx > 0 ? `1px solid ${T.borderDefault}` : undefined,
+                  }}
                 >
                   {h}
                 </th>
@@ -921,31 +926,41 @@ function ResultView({
             </tr>
           </thead>
           <tbody>
-            {result.policyResults.map((r) => (
-              <tr key={r.uid} style={{ borderBottom: `1px solid ${T.borderLow}` }}>
+            {result.policyResults.map((r, rowIdx) => (
+              // 奇偶列交替底色
+              <tr
+                key={r.uid}
+                style={{
+                  borderBottom: `1px solid ${T.borderLow}`,
+                  backgroundColor: rowIdx % 2 === 0 ? T.white : T.bgLight,
+                }}
+              >
                 <td className="px-3 py-2" style={{ color: T.textDefault }}>{r.shortName}</td>
-                <td className="px-3 py-2 whitespace-nowrap" style={{ color: T.textDefault }}>{r.paymentPeriod}</td>
-                <td className="px-3 py-2 whitespace-nowrap" style={{ color: T.textDefault }}>
+                <td className="px-3 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{r.paymentPeriod}</td>
+                <td className="px-3 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>
                   {r.currency} {Number(r.annualPremium.replace(/,/g, "")).toLocaleString()}
                 </td>
-                <td className="px-3 py-2" style={{ color: T.textDefault }}>x{r.rate}</td>
-                <td className="px-3 py-2" style={{ color: T.textDefault }}>x{r.typeWeightPct}</td>
-                <td className="px-3 py-2" style={{ color: T.textDefault }}>x{r.periodWeightPct}</td>
-                <td className="px-3 py-2 font-semibold whitespace-nowrap bg-white" style={{ color: T.textDefault }}>
+                <td className="px-3 py-2" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>x{r.rate}</td>
+                <td className="px-3 py-2" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>x{r.typeWeightPct}</td>
+                <td className="px-3 py-2" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>x{r.periodWeightPct}</td>
+                <td className="px-3 py-2 font-semibold whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>
                   TWD {formatTWD(r.calcPremium)}
                 </td>
               </tr>
             ))}
-            {/* 合計列 */}
-            <tr style={{ backgroundColor: T.bgTableHeader }}>
+            {/* 合計列：白底、保留直行分隔線 */}
+            <tr>
               <td
                 colSpan={6}
-                className="px-3 py-2 font-semibold text-left bg-white"
-                style={{ color: T.textDark }}
+                className="px-3 py-2 font-semibold text-left"
+                style={{ color: T.textDark, backgroundColor: T.white }}
               >
                 本次試算資格保費加總
               </td>
-              <td className="px-3 py-2 font-semibold bg-white" style={{ color: T.textDefault }}>
+              <td
+                className="px-3 py-2 font-semibold"
+                style={{ color: T.textDefault, backgroundColor: T.white, borderLeft: `1px solid ${T.borderDefault}` }}
+              >
                 TWD {formatTWD(result.additionalPremium)}
               </td>
             </tr>
@@ -954,23 +969,41 @@ function ResultView({
       </div>
 
       {/* ── 各等級會員權益（可展開） ── */}
-      <div
-        className="rounded-[6px] overflow-hidden"
-        style={{ border: `1px solid ${T.borderLow}` }}
-      >
-        <button
-          className="w-full flex items-center justify-between px-4 py-3 font-semibold text-[15px]"
-          style={{ backgroundColor: T.primaryLight, color: T.primary }}
-          onClick={() => setBenefitsOpen(!benefitsOpen)}
+      <div className="rounded-[6px] overflow-hidden">
+        <div
+          className="rounded-[6px] overflow-hidden"
+          style={{ border: `1px solid ${T.borderLow}` }}
         >
-          各等級會員權益
-          <span className="flex items-center gap-1 text-[14px]">
-            權益一覽
-            {benefitsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </span>
-        </button>
+          <button
+            className="w-full flex items-center justify-between px-4 py-3 font-semibold text-[15px]"
+            style={{ backgroundColor: T.primaryLight, color: T.primary }}
+            onClick={() => setBenefitsOpen(!benefitsOpen)}
+          >
+            各等級會員權益
+            <span className="flex items-center gap-1 text-[14px]">
+              權益一覽
+              {benefitsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </span>
+          </button>
 
-        {benefitsOpen && <BenefitsTable highlightKey={projected.key} />}
+          {benefitsOpen && <BenefitsTable highlightKey={projected.key} />}
+        </div>
+
+        {benefitsOpen && (
+          <div className="p-0" style={{ borderTop: "none", borderImage: "none" }}>
+            <div className="flex items-start gap-2 mt-3">
+              <Info size={14} style={{ color: T.textMedium, marginTop: 3, flexShrink: 0 }} />
+              <ol
+                className="text-[13px] leading-[20px] list-decimal list-outside pl-4 flex flex-col gap-[2px]"
+                style={{ color: T.textMedium }}
+              >
+                <li>顯示內容為服務總覽，倘貴賓資格為升等，服務將以差額提供。</li>
+                <li>會員禮：成為尊榮會員或會員生日時（會員資格期間），公司將致贈會員禮，每年度（曆年）限定領取一次，依據會員資格狀態，至多領取3年。</li>
+                <li>首年禮：成為尊榮2星、尊榮3星、尊榮4星會員時，公司將致贈首年禮，兌換效期至服務起始日隔年12月31日止。</li>
+              </ol>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── 分隔線 ── */}
@@ -1074,93 +1107,123 @@ function GapBreakdownTable({ gap }: { gap: number }) {
 // 會員權益對照表
 // ═══════════════════════════════════════════════════════════
 function BenefitsTable({ highlightKey }: { highlightKey: string }) {
-  // 計算 rowspan（相同 category 的合併列數）
   const categories = Array.from(new Set(MEMBER_BENEFITS.map((b) => b.category)));
 
+  // 攤平所有列，方便取得全域 rowIndex 與判斷最後一列
+  const allRows = categories.flatMap((cat) => {
+    const rows = MEMBER_BENEFITS.filter((b) => b.category === cat);
+    return rows.map((b, ri) => ({ cat, b, ri, catRowCount: rows.length }));
+  });
+  const totalRows = allRows.length;
+
   return (
-    <div style={{ overflowX: "auto" }}>
-      <table className="w-full border-collapse text-[14px]">
-        <thead>
-          <tr style={{ backgroundColor: T.bgTableHeader }}>
-            <th
-              colSpan={2}
-              className="px-3 py-2 text-left font-semibold"
-              style={{ color: T.textDark, borderBottom: `1px solid ${T.borderLow}` }}
-            >
-              會員權益
-            </th>
-            {MEMBER_LEVELS.map((lv) => (
+    <>
+      <div style={{ overflowX: "auto" }}>
+        <table className="w-full border-collapse text-[14px]">
+          <thead>
+            <tr style={{ backgroundColor: T.bgTableHeader }}>
               <th
-                key={lv.key}
-                className="px-3 py-2 text-center font-semibold whitespace-nowrap"
-                style={{
-                  color: lv.key === highlightKey ? T.primary : T.textDark,
-                  backgroundColor:
-                    lv.key === highlightKey ? T.highlight : T.bgTableHeader,
-                  borderBottom: `1px solid ${T.borderLow}`,
-                }}
+                colSpan={2}
+                className="px-3 py-2 text-left font-semibold"
+                style={{ color: T.textDark, borderBottom: `1px solid ${T.borderLow}`, width: 248 }}
               >
-                {lv.name}
+                會員權益
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {categories.flatMap((cat) => {
-            const rows = MEMBER_BENEFITS.filter((b) => b.category === cat);
-            return rows.map((b, ri) => (
-              <tr
-                key={`${cat}-${ri}`}
-                style={{ borderBottom: `1px solid ${T.borderLow}` }}
-              >
-                {/* 類別欄：只在第一列顯示，其餘 rowspan 視覺模擬 */}
-                {ri === 0 && (
-                  <td
-                    rowSpan={rows.length}
-                    className="px-3 py-2 font-semibold align-middle"
+              {MEMBER_LEVELS.map((lv) => {
+                const isHL = lv.key === highlightKey;
+                return (
+                  <th
+                    key={lv.key}
+                    className="px-3 py-2 text-center font-semibold whitespace-nowrap"
                     style={{
-                      color: T.textDefault,
-                      borderRight: `1px solid ${T.borderLow}`,
-                      verticalAlign: "middle",
+                      // highlight 欄：藍底白字 + 2px 藍框；其他欄：正常表頭底色 + 1px 分隔線
+                      color: isHL ? T.textWhite : T.textDark,
+                      backgroundColor: isHL ? "#0099e0" : T.bgTableHeader,
+                      borderBottom: `1px solid ${T.borderLow}`,
+                      borderLeft: isHL ? `2px solid #0099e0` : `1px solid ${T.borderDefault}`,
+                      borderTop: isHL ? `2px solid #0099e0` : undefined,
+                      borderRight: isHL ? `2px solid #0099e0` : undefined,
                     }}
                   >
-                    {cat}
-                  </td>
-                )}
-                {/* 子類別 */}
-                <td className="px-3 py-2" style={{ color: T.textMedium }}>
-                  {b.sub ?? ""}
-                </td>
-                {/* 各等級值 */}
-                {MEMBER_LEVELS.map((lv) => {
-                  const val = b.vals[lv.key as keyof typeof b.vals];
-                  return (
+                    {lv.name}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {allRows.map(({ cat, b, ri, catRowCount }, rowIdx) => {
+              const isLastRow = rowIdx === totalRows - 1;
+              // 奇偶列交替底色
+              const rowBg = rowIdx % 2 === 0 ? T.white : T.bgLight;
+              return (
+                <tr
+                  key={`${cat}-${ri}`}
+                  style={{ borderBottom: `1px solid ${T.borderLow}` }}
+                >
+                  {/* 類別欄：只在分組第一列顯示，固定淺灰底色（跨列無法交替） */}
+                  {ri === 0 && (
                     <td
-                      key={lv.key}
-                      className="px-3 py-2 text-center"
+                      rowSpan={catRowCount}
+                      className="px-3 py-2 font-semibold align-middle"
                       style={{
-                        backgroundColor:
-                          lv.key === highlightKey ? T.highlight : "transparent",
+                        width: 160,
+                        color: T.textDefault,
+                        backgroundColor: T.bgLight,
+                        borderRight: `1px solid ${T.borderDefault}`,
+                        verticalAlign: "middle",
                       }}
                     >
-                      {val === "check" ? (
-                        <Check
-                          size={16}
-                          className="mx-auto"
-                          style={{ color: T.success }}
-                        />
-                      ) : (
-                        <span style={{ color: T.textDefault }}>{val ?? ""}</span>
-                      )}
+                      {cat}
                     </td>
-                  );
-                })}
-              </tr>
-            ));
-          })}
-        </tbody>
-      </table>
-    </div>
+                  )}
+                  {/* 子類別 */}
+                  <td
+                    className="px-3 py-2"
+                    style={{
+                      color: T.textMedium,
+                      backgroundColor: rowBg,
+                      borderRight: `1px solid ${T.borderDefault}`,
+                    }}
+                  >
+                    {b.sub ?? ""}
+                  </td>
+                  {/* 各等級值 */}
+                  {MEMBER_LEVELS.map((lv) => {
+                    const isHL = lv.key === highlightKey;
+                    const val = b.vals[lv.key as keyof typeof b.vals];
+                    return (
+                      <td
+                        key={lv.key}
+                        className="px-3 py-2 text-center"
+                        style={{
+                          backgroundColor: rowBg,
+                          // highlight 欄：左右 2px 藍框，最後一列額外加底部藍框
+                          borderLeft: isHL ? `2px solid #0099e0` : `1px solid ${T.borderDefault}`,
+                          borderRight: isHL ? `2px solid #0099e0` : undefined,
+                          borderBottom: isHL && isLastRow ? `2px solid #0099e0` : undefined,
+                        }}
+                      >
+                        {val === "check" ? (
+                          <Check
+                            size={16}
+                            className="mx-auto"
+                            style={{ color: T.success }}
+                          />
+                        ) : (
+                          <span style={{ color: T.textDefault }}>{val ?? ""}</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+    </>
   );
 }
 
