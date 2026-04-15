@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, ChevronDown, ChevronUp, Trash2, Check, ArrowRight } from "lucide-react";
 
 // ── 設計 Token ──────────────────────────────────────────────
@@ -400,6 +401,8 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
   const [benefitsOpen, setBenefitsOpen] = useState(false);
   const [policies, setPolicies] = useState<PolicyEntry[]>([newPolicy()]);
   const [result, setResult] = useState<CalcResult | null>(null);
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingFading, setLoadingFading] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const currentLevel = getLevelByPremium(currentPremium);
@@ -518,8 +521,20 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
     const projected = getLevelByPremium(total);
     const willUpgrade = projected.key !== currentLevel.key;
 
-    setResult({ additionalPremium: additional, totalPremium: total, projectedLevel: projected, willUpgrade, policyResults });
-    setView("result");
+    const calcResult: CalcResult = { additionalPremium: additional, totalPremium: total, projectedLevel: projected, willUpgrade, policyResults };
+
+    // 顯示 loading 彈窗，1.7s 後切換結果頁並開始淡出，2s 後完全隱藏
+    setShowLoading(true);
+    setLoadingFading(false);
+    setTimeout(() => {
+      setResult(calcResult);
+      setView("result");
+      setLoadingFading(true);
+      setTimeout(() => {
+        setShowLoading(false);
+        setLoadingFading(false);
+      }, 300);
+    }, 1700);
   }
 
   function handleReset() {
@@ -527,6 +542,7 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
     setResult(null);
     setView("input");
     setBenefitsOpen(false);
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }
 
   useEffect(() => {
@@ -537,6 +553,7 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
 
   // ── 渲染 ─────────────────────────────────────────────────
   return (
+    <>
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
@@ -620,6 +637,51 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
         </div>
       </div>
     </div>
+
+    {/* Loading 彈窗 */}
+    {showLoading && createPortal(
+      <div
+        className="fixed inset-0 z-[400] flex items-center justify-center"
+        style={{
+          backgroundColor: "rgba(0,0,0,0.4)",
+          opacity: loadingFading ? 0 : 1,
+          transition: "opacity 0.3s ease",
+          pointerEvents: loadingFading ? "none" : "auto",
+        }}
+      >
+        <div
+          className="flex flex-col items-center justify-center gap-3 rounded-[8px]"
+          style={{
+            backgroundColor: "rgba(19,26,52,0.85)",
+            padding: "25px 40px",
+          }}
+        >
+          {/* NS logo 動畫（黃色三角形） */}
+          <div className="size-[80px] flex items-center justify-center" style={{ animation: "nsPulse 1.2s ease-in-out infinite" }}>
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+              {/* 外層大三角形 */}
+              <polygon points="40,8 72,68 8,68" fill="#F5A800" />
+              {/* 內層小三角形（鏤空效果） */}
+              <polygon points="40,38 54,62 26,62" fill="rgba(19,26,52,0.85)" />
+            </svg>
+          </div>
+          <p
+            className="text-white text-[16px] font-medium whitespace-nowrap"
+            style={{ fontFamily: "'PingFang TC', sans-serif" }}
+          >
+            載入中...
+          </p>
+        </div>
+      </div>,
+      document.body
+    )}
+    <style>{`
+      @keyframes nsPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(0.88); opacity: 0.75; }
+      }
+    `}</style>
+    </>
   );
 }
 
@@ -868,7 +930,7 @@ function ResultView({
               >
                 本次試算資格保費加總
               </td>
-              <td className="px-3 py-2 font-semibold" style={{ color: T.textDefault }}>
+              <td className="px-3 py-2 font-semibold bg-white" style={{ color: T.textDefault }}>
                 TWD {formatTWD(result.additionalPremium)}
               </td>
             </tr>
@@ -1109,6 +1171,7 @@ function PolicyCard({
   onChangePremium: (uid: number, v: string) => void;
   onRemove: (uid: number) => void;
 }) {
+  const [showConfirm, setShowConfirm] = useState(false);
   const product = PRODUCTS.find((p) => p.id === pol.productId);
 
   const inputStyle = (disabled: boolean): React.CSSProperties => ({
@@ -1125,6 +1188,7 @@ function PolicyCard({
   });
 
   return (
+    <>
     <div
       className="rounded-[8px] px-4 py-4 flex flex-col gap-4"
       style={{ border: `1px solid ${T.borderLow}`, backgroundColor: T.bgLight }}
@@ -1138,7 +1202,7 @@ function PolicyCard({
           <button
             className="flex items-center gap-1 text-[13px] font-semibold"
             style={{ color: T.error }}
-            onClick={() => onRemove(pol.uid)}
+            onClick={() => setShowConfirm(true)}
           >
             <Trash2 size={14} />
             刪除
@@ -1292,5 +1356,79 @@ function PolicyCard({
         </div>
       </div>
     </div>
+
+    {/* 刪除確認彈窗 */}
+    {showConfirm && createPortal(
+      <div
+        className="fixed inset-0 z-[300] flex items-center justify-center"
+        style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+      >
+        <div
+          className="flex flex-col rounded-[12px] overflow-hidden"
+          style={{
+            backgroundColor: T.white,
+            width: 280,
+            boxShadow: "0px 2px 4px 0px rgba(59,66,70,0.08)",
+          }}
+        >
+          {/* 圖示 + 標題 */}
+          <div className="flex flex-col items-center gap-4 p-4">
+            {/* 警告圖示：外圈淡紅 + 內圈實心紅 + 白色驚嘆號 */}
+            <div
+              className="size-24 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "#fce8e6" }}
+            >
+              <div
+                className="size-[72px] rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "#e60013" }}
+              >
+                <span
+                  className="text-white font-black text-[36px] leading-none select-none"
+                  style={{ fontFamily: "sans-serif" }}
+                >
+                  !
+                </span>
+              </div>
+            </div>
+            <p
+              className="text-center font-semibold text-[20px] leading-8 w-full"
+              style={{ color: T.textDefault, fontFamily: "'PingFang TC', sans-serif" }}
+            >
+              確定要刪除此主約嗎？
+            </p>
+          </div>
+          {/* 按鈕區 */}
+          <div className="flex gap-4 p-4">
+            <button
+              className="flex-1 h-12 flex items-center justify-center rounded-[6px] font-semibold text-[18px]"
+              style={{
+                border: `1px solid ${T.primary}`,
+                color: T.primary,
+                fontFamily: "'PingFang TC', sans-serif",
+              }}
+              onClick={() => setShowConfirm(false)}
+            >
+              返回
+            </button>
+            <button
+              className="flex-1 h-12 flex items-center justify-center rounded-[6px] font-semibold text-[18px]"
+              style={{
+                backgroundColor: "#e60013",
+                color: T.white,
+                fontFamily: "'PingFang TC', sans-serif",
+              }}
+              onClick={() => {
+                onRemove(pol.uid);
+                setShowConfirm(false);
+              }}
+            >
+              確定刪除
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
+    </>
   );
 }
