@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel --version)",
+      "Bash(rsync -av --exclude='node_modules' --exclude='.next' --exclude='.git' --exclude='.vercel' \"/Users/goons/Downloads/CC Test/design-system/\" \"/Users/goons/Downloads/yuu-agent/Product/NS-test/\")"
+    ]
+  }
+}
