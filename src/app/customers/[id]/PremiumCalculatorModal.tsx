@@ -335,6 +335,13 @@ function formatTWD(n: number) {
   return n.toLocaleString("zh-TW");
 }
 
+function formatNumberWithCommas(raw: string) {
+  if (!raw) return "";
+  const digits = raw.replace(/[^0-9]/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("en-US");
+}
+
 // ── PolicyEntry 型別 ─────────────────────────────────────────
 interface PolicyEntry {
   uid: number;
@@ -465,12 +472,11 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
   }
 
   function onChangePremium(uid: number, val: string) {
-    // 只保留數字與逗號
-    const clean = val.replace(/[^0-9,]/g, "");
+    const formatted = formatNumberWithCommas(val);
     setPolicies((prev) =>
       prev.map((pol) =>
         pol.uid === uid
-          ? { ...pol, annualPremium: clean, errors: { ...pol.errors, annualPremium: undefined } }
+          ? { ...pol, annualPremium: formatted, errors: { ...pol.errors, annualPremium: undefined } }
           : pol
       )
     );
@@ -482,6 +488,22 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
 
   function onRemovePolicy(uid: number) {
     setPolicies((prev) => prev.filter((p) => p.uid !== uid));
+  }
+
+  function runWithLoading(onComplete: () => void) {
+    if (showLoading) return;
+    setShowLoading(true);
+    setLoadingFading(false);
+    setTimeout(() => {
+      onComplete();
+      setLoadingFading(true);
+      setTimeout(() => {
+        setShowLoading(false);
+        setLoadingFading(false);
+        // 等載入彈窗完全消失後，再回到彈窗內容頂部
+        scrollContainerRef.current?.scrollTo({ top: 0, behavior: "auto" });
+      }, 300);
+    }, 1700);
   }
 
   // ── 試算 ─────────────────────────────────────────────────
@@ -523,33 +545,26 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
 
     const calcResult: CalcResult = { additionalPremium: additional, totalPremium: total, projectedLevel: projected, willUpgrade, policyResults };
 
-    // 顯示 loading 彈窗，1.7s 後切換結果頁並開始淡出，2s 後完全隱藏
-    setShowLoading(true);
-    setLoadingFading(false);
-    setTimeout(() => {
+    runWithLoading(() => {
       setResult(calcResult);
       setView("result");
-      setLoadingFading(true);
-      setTimeout(() => {
-        setShowLoading(false);
-        setLoadingFading(false);
-      }, 300);
-    }, 1700);
+    });
   }
 
   function handleReset() {
-    setPolicies([newPolicy()]);
-    setResult(null);
-    setView("input");
-    setBenefitsOpen(false);
-    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    runWithLoading(() => {
+      setPolicies([newPolicy()]);
+      setResult(null);
+      setView("input");
+      setBenefitsOpen(false);
+    });
   }
 
   useEffect(() => {
-    if (view === "result") {
+    if (view === "result" && !showLoading) {
       scrollContainerRef.current?.scrollTo({ top: 0 });
     }
-  }, [view]);
+  }, [view, showLoading]);
 
   // ── 渲染 ─────────────────────────────────────────────────
   return (
@@ -765,7 +780,7 @@ function InputView({
               style={{ color: T.primary }}
               onClick={() => setGapOpen(!gapOpen)}
             >
-              各險種換算實收資格保費缺口
+              各險種換算實收年繳保費缺口
               {gapOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
           </div>
