@@ -865,7 +865,7 @@ function ResultView({
       <div className="flex items-start justify-between">
         <div className="w-full flex items-center gap-3">
           {/* 當前等級 */}
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full">
             <div className="text-[12px]" style={{ color: T.textMedium }}>當前等級</div>
             <div className="text-[26px] font-bold" style={{ color: T.textDefault }}>
               {currentLevel.name}
@@ -875,10 +875,10 @@ function ResultView({
             </div>
           </div>
 
-          <ArrowRight size={20} style={{ color: T.textMedium, marginTop: 8 }} />
+          <ArrowRight size={32} style={{ color: T.textMedium, marginTop: 8 }} />
 
           {/* 試算後等級 */}
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full">
             <div className="text-[12px]" style={{ color: T.textMedium }}>試算後等級</div>
             <div
               className="text-[26px] font-bold"
