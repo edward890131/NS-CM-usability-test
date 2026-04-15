@@ -7,7 +7,12 @@
       "Bash(xargs -I{} lsof -p {})",
       "Bash(echo \"EXIT: $?\")",
       "Bash(git add:*)",
-      "Bash(git commit -m ':*)"
+      "Bash(git commit -m ':*)",
+      "Bash(git remote:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
