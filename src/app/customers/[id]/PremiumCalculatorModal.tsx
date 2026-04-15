@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, ChevronDown, ChevronUp, Trash2, Check, ArrowRight } from "lucide-react";
 
 // ── 設計 Token ──────────────────────────────────────────────
@@ -63,9 +63,9 @@ const PRODUCTS: Product[] = [
     defaultRate: 1,
     productTypeWeight: 1.0,
     category: "other",
-    paymentPeriods: ["躉繳"],
-    periodWeights: { "躉繳": 0.1 },
-    defaultPeriod: "躉繳",
+    paymentPeriods: ["1年期"],
+    periodWeights: { "1年期": 0.1 },
+    defaultPeriod: "1年期",
   },
   // ── RP 壽險（USD）────────────────────────────────────────
   {
@@ -400,6 +400,7 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
   const [benefitsOpen, setBenefitsOpen] = useState(false);
   const [policies, setPolicies] = useState<PolicyEntry[]>([newPolicy()]);
   const [result, setResult] = useState<CalcResult | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const currentLevel = getLevelByPremium(currentPremium);
   const nextLevel = getNextLevel(currentPremium);
@@ -506,7 +507,7 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
         currency: pol.currency,
         annualPremium: pol.annualPremium,
         rate: pol.rate,
-        typeWeightPct: `${Math.round(pol.productTypeWeight * 100)}%`,
+        typeWeightPct: `${pol.productTypeWeight}`,
         periodWeightPct: `${Math.round(pol.periodWeight * 100)}%`,
         calcPremium: calc,
       };
@@ -527,6 +528,12 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
     setView("input");
     setBenefitsOpen(false);
   }
+
+  useEffect(() => {
+    if (view === "result") {
+      scrollContainerRef.current?.scrollTo({ top: 0 });
+    }
+  }, [view]);
 
   // ── 渲染 ─────────────────────────────────────────────────
   return (
@@ -552,7 +559,7 @@ export default function PremiumCalculatorModal({ onClose, currentPremium }: Prop
         </div>
 
         {/* ── 可滾動主體 ── */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
           {view === "input" ? (
             <InputView
               currentLevel={currentLevel}
@@ -671,7 +678,7 @@ function InputView({
           <div
             className="flex items-center justify-between px-4 py-3"
             style={{
-              backgroundColor: T.primaryLight,
+              backgroundColor: "rgba(232, 242, 250, 1)",
               borderWidth: 1,
               borderStyle: "solid",
               borderColor: "rgba(0, 111, 188, 1)",
@@ -779,7 +786,7 @@ function ResultView({
     <div className="px-6 py-5 flex flex-col gap-5">
       {/* ── 等級比較 Header ── */}
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+        <div className="w-full flex items-center gap-3">
           {/* 當前等級 */}
           <div className="flex flex-col">
             <div className="text-[12px]" style={{ color: T.textMedium }}>當前等級</div>
@@ -810,7 +817,7 @@ function ResultView({
 
         {/* 建立建議書 */}
         <button
-          className="px-3 h-[36px] rounded-[6px] text-[14px] font-semibold flex items-center gap-1"
+          className="w-[124px] px-3 h-[36px] rounded-[6px] text-[14px] font-semibold flex items-center gap-1"
           style={{ border: `1px solid ${T.primary}`, color: T.primary }}
         >
           + 建立建議書
@@ -847,7 +854,7 @@ function ResultView({
                 <td className="px-3 py-2" style={{ color: T.textDefault }}>x{r.rate}</td>
                 <td className="px-3 py-2" style={{ color: T.textDefault }}>x{r.typeWeightPct}</td>
                 <td className="px-3 py-2" style={{ color: T.textDefault }}>x{r.periodWeightPct}</td>
-                <td className="px-3 py-2 font-semibold whitespace-nowrap" style={{ color: T.textDefault }}>
+                <td className="px-3 py-2 font-semibold whitespace-nowrap bg-white" style={{ color: T.textDefault }}>
                   TWD {formatTWD(r.calcPremium)}
                 </td>
               </tr>
@@ -856,7 +863,7 @@ function ResultView({
             <tr style={{ backgroundColor: T.bgTableHeader }}>
               <td
                 colSpan={6}
-                className="px-3 py-2 font-semibold text-right"
+                className="px-3 py-2 font-semibold text-left bg-white"
                 style={{ color: T.textDark }}
               >
                 本次試算資格保費加總
@@ -912,7 +919,7 @@ function ResultView({
         ))}
         <button
           className="w-full h-[44px] rounded-[6px] text-[15px] font-semibold flex items-center justify-center"
-          style={{ border: `1px dashed ${T.primary}`, color: T.primary }}
+          style={{ border: `1px solid ${T.primary}`, color: T.primary }}
           onClick={onAddPolicy}
         >
           + 新增主約
@@ -931,9 +938,9 @@ function GapBreakdownTable({ gap }: { gap: number }) {
   }
 
   return (
-    <div className="px-4 py-4" style={{ backgroundColor: T.white }}>
+    <div className="px-4 py-4" style={{ backgroundColor: "rgba(232, 242, 250, 1)" }}>
       <p className="text-[14px] mb-3" style={{ color: T.textMedium }}>
-        如果要升等，新約保單的資格保費需超過：
+        如果要升等，新約保單的年繳保費需超過：
       </p>
       <div
         className="grid grid-cols-2 gap-4"
@@ -1155,7 +1162,7 @@ function PolicyCard({
               <option value="">選擇主約</option>
               {PRODUCTS.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name}
+                  {`${p.shortName} ${p.name}`}
                 </option>
               ))}
             </select>
@@ -1204,8 +1211,8 @@ function PolicyCard({
           <div className="relative">
             <select
               value={pol.currency}
-              disabled={!pol.productId}
-              style={{ ...inputStyle(!pol.productId), paddingRight: 28, appearance: "none" }}
+              disabled
+              style={{ ...inputStyle(true), paddingRight: 28, appearance: "none" }}
             >
               <option value="">{pol.productId ? "請選擇幣別" : ""}</option>
               {pol.currency && (
@@ -1266,7 +1273,7 @@ function PolicyCard({
             <label className="text-[12px]" style={{ color: T.textMedium }}>商品類型權數</label>
             <input
               disabled
-              value={pol.productTypeWeight ? `${Math.round(pol.productTypeWeight * 100)}%` : ""}
+              value={pol.productTypeWeight ? `${pol.productTypeWeight}` : ""}
               style={inputStyle(true)}
             />
           </div>
