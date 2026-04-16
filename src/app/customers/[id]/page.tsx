@@ -3,7 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { User, ChevronLeft, Plus, MoreHorizontal } from "lucide-react";
+import {
+  User, ChevronLeft, Plus, MoreHorizontal, Info,
+  LayoutDashboard, Bookmark, Users, UserCheck, Briefcase,
+  Clock, FileText, Wrench, Bell, Settings, Building2, ChevronDown,
+  type LucideIcon,
+} from "lucide-react";
 import PremiumCalculatorModal from "./PremiumCalculatorModal";
 
 // ── 設計 Token ──────────────────────────────────────────────
@@ -13,6 +18,7 @@ const T = {
   primaryLight: "rgba(0,111,188,0.1)",
   white: "#ffffff",
   bgLight: "#f6f6f6",
+  bgPaleGrey: "#fafafa",
   bgTableHeader: "#f2f6f9",
   textDefault: "#3c3c3c",
   textMedium: "#696969",
@@ -25,6 +31,39 @@ const T = {
   positiveDark: "#148056",
   positiveLight: "rgba(0,160,105,0.1)",
   highlight: "#0099e0",
+};
+
+// ── Side Menu icon map ─────────────────────────────────────
+const SIDE_ICONS: Record<string, LucideIcon> = {
+  "客戶管理摘要": LayoutDashboard,
+  "客戶組成":     Bookmark,
+  "所有客戶":     Users,
+  "專案經營名單": UserCheck,
+  "我的自建組合": Briefcase,
+  "近期接觸機會": Clock,
+  "所有保單":     FileText,
+  "案件處理進度": Wrench,
+  "保單重要事件": Bell,
+  "承接/指派保單": Settings,
+  "金融機構間資料共享": Building2,
+};
+
+// 在客戶詳細頁，「所有客戶」為 active
+const SIDE_ACTIVE = "所有客戶";
+
+// ── Drawer Bar 圖片資源（Figma assets，7 天後需更換為本地 SVG） ──
+const DRAWER_ASSETS = {
+  zhaoHui:      "https://www.figma.com/api/mcp/asset/02f35120-8bde-40db-80de-51ae06e2b3e9",
+  zhaoHuiInner: "https://www.figma.com/api/mcp/asset/6ee40c8e-2262-4747-9cb8-75a8ba335497",
+  bell:         "https://www.figma.com/api/mcp/asset/87a8ac1d-dc1a-4cda-9923-7e43985535bc",
+  calendar:     "https://www.figma.com/api/mcp/asset/2ea7e90b-88d1-4ed9-a3c5-b73d5068f355",
+  sales:        "https://www.figma.com/api/mcp/asset/55f3a89e-7ee0-4a43-8b3f-b866d4aeeb0d",
+  detail:       "https://www.figma.com/api/mcp/asset/2d971fa7-6daa-4a7c-921b-b49c86ccf36a",
+  toSign:       "https://www.figma.com/api/mcp/asset/86051ad2-83fd-4e60-bab5-ef7d064a2f00",
+  question:     "https://www.figma.com/api/mcp/asset/fc7412e5-62df-4227-86ce-691de1625a01",
+  schedule:     "https://www.figma.com/api/mcp/asset/2ea7e90b-88d1-4ed9-a3c5-b73d5068f355",
+  apps:         "https://www.figma.com/api/mcp/asset/892cb249-39bd-4ac4-a27f-1d355528dc6a",
+  move:         "https://www.figma.com/api/mcp/asset/81e0753b-3cfa-4acd-bb01-e172776074c8",
 };
 
 // ── 頂部導覽 ────────────────────────────────────────────────
@@ -170,7 +209,7 @@ function AppHeader() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// SideMenu
+// SideMenu（含 icon、active 狀態）
 // ═══════════════════════════════════════════════════════════
 function SideMenu() {
   const groups = Array.from(new Set(sideMenuItems.map((i) => i.group)));
@@ -179,7 +218,7 @@ function SideMenu() {
       className="w-[240px] shrink-0 flex flex-col h-full"
       style={{ backgroundColor: T.white, borderRight: `1px solid ${T.borderLow}` }}
     >
-      <div className="flex-1 flex flex-col px-3 py-5 overflow-y-auto gap-0">
+      <div className="flex-1 flex flex-col px-3 py-5 overflow-y-auto">
         {groups.map((group, gi) => (
           <div key={group}>
             {gi > 0 && (
@@ -191,17 +230,38 @@ function SideMenu() {
             {sideMenuItems
               .filter((item) => item.group === group)
               .map((item) => {
+                const isActive = item.label === SIDE_ACTIVE;
+                const IconComp = SIDE_ICONS[item.label];
+                const hasArrow = item.label === "承接/指派保單";
+
                 const inner = (
                   <span
-                    className="flex items-center gap-2 w-full h-[48px] px-2 rounded text-[16px] font-semibold text-left"
+                    className="flex items-center gap-2 w-full h-[48px] px-2 rounded-[4px] text-[16px] font-semibold"
                     style={{
-                      color: T.textDefault,
+                      backgroundColor: isActive ? T.primary : "transparent",
+                      color: isActive ? T.white : T.textDefault,
                       fontFamily: "'PingFang TC', sans-serif",
                     }}
                   >
-                    <span className="truncate">{item.label}</span>
+                    {/* Icon */}
+                    {IconComp && (
+                      <IconComp
+                        size={20}
+                        style={{ color: isActive ? T.white : T.textDefault, flexShrink: 0 }}
+                      />
+                    )}
+                    {/* 文字 */}
+                    <span className="flex-1 truncate text-left">{item.label}</span>
+                    {/* 展開箭頭（僅承接/指派保單） */}
+                    {hasArrow && (
+                      <ChevronDown
+                        size={16}
+                        style={{ color: isActive ? T.white : T.textMedium, flexShrink: 0 }}
+                      />
+                    )}
                   </span>
                 );
+
                 return item.href ? (
                   <Link key={item.label} href={item.href} style={{ display: "block" }}>
                     {inner}
@@ -215,6 +275,8 @@ function SideMenu() {
           </div>
         ))}
       </div>
+
+      {/* 收合按鈕 */}
       <div className="px-3 pb-5 pt-3 flex justify-end">
         <button
           className="flex items-center justify-center w-8 h-8 rounded-[6px]"
@@ -223,6 +285,79 @@ function SideMenu() {
           <ChevronLeft size={16} />
         </button>
       </div>
+    </aside>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// DrawerBar（右側固定操作欄）
+// ═══════════════════════════════════════════════════════════
+function DrawerBar() {
+  const icons = [
+    { src: DRAWER_ASSETS.bell,     alt: "通知" },
+    { src: DRAWER_ASSETS.calendar, alt: "日曆" },
+    { src: DRAWER_ASSETS.sales,    alt: "人員" },
+    { src: DRAWER_ASSETS.detail,   alt: "文件" },
+    { src: DRAWER_ASSETS.toSign,   alt: "簽署" },
+    { src: DRAWER_ASSETS.question, alt: "問題" },
+    { src: DRAWER_ASSETS.schedule, alt: "排程" },
+    { src: DRAWER_ASSETS.apps,     alt: "應用" },
+  ];
+
+  return (
+    <aside
+      className="shrink-0 flex flex-col h-full"
+      style={{ width: 56, backgroundColor: T.white, borderLeft: `1px solid ${T.borderLow}`, paddingTop: 20 }}
+    >
+      {/* 照會（含紅色角標） */}
+      <button
+        className="flex items-center justify-center shrink-0"
+        style={{ height: 48, width: 56 }}
+      >
+        <div style={{ position: "relative", width: 22, height: 22 }}>
+          {/* 底層圖示 */}
+          <img
+            src={DRAWER_ASSETS.zhaoHui}
+            alt="照會"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+          />
+          {/* 內層圖示 */}
+          <div style={{ position: "absolute", inset: "12.5% 11.88% 11.59% 10.42%" }}>
+            <img src={DRAWER_ASSETS.zhaoHuiInner} alt="" style={{ width: "100%", height: "100%" }} />
+          </div>
+          {/* 紅色角標 */}
+          <div
+            style={{
+              position: "absolute", top: -2, right: -2,
+              width: 7, height: 7, borderRadius: "50%",
+              backgroundColor: "#e53e3e",
+              border: `1.5px solid ${T.white}`,
+            }}
+          />
+        </div>
+      </button>
+
+      {/* 其他 icon 按鈕 */}
+      {icons.map(({ src, alt }) => (
+        <button
+          key={alt}
+          className="flex items-center justify-center shrink-0"
+          style={{ height: 48, width: 56 }}
+        >
+          <img src={src} alt={alt} style={{ width: 24, height: 24 }} />
+        </button>
+      ))}
+
+      {/* spacer */}
+      <div className="flex-1" />
+
+      {/* 底部移動圖示 */}
+      <button
+        className="flex items-center justify-center shrink-0"
+        style={{ height: 56, width: 56 }}
+      >
+        <img src={DRAWER_ASSETS.move} alt="移動" style={{ width: 21, height: 21 }} />
+      </button>
     </aside>
   );
 }
@@ -494,17 +629,18 @@ function CustomerSummaryHeader({
 function LevelMedalCard() {
   return (
     <div
-      className="rounded-[8px]"
+      className="rounded-[8px] overflow-hidden"
       style={{
         backgroundColor: T.white,
         boxShadow: "0px 2px 4px 0px rgba(59,66,70,0.08)",
-        overflow: "visible",
       }}
     >
-      <div className="px-6 py-5">
-        {/* 主要內容：牌卡圖 + 資料 */}
-        <div className="flex items-start">
-          {/* LevelCard.png 圖片 */}
+      {/* 外層 px-4，整體 py-4，子元素 gap-4 */}
+      <div className="px-4 py-4 flex flex-col gap-4">
+
+        {/* 左右排列：牌卡圖 + 垂直分隔 + 資料欄 */}
+        <div className="flex items-center px-6 py-5">
+          {/* LevelCard.png：陰影直接加在圖片容器 */}
           <div
             className="rounded-[8px] overflow-hidden shrink-0"
             style={{
@@ -517,27 +653,27 @@ function LevelMedalCard() {
             <img
               src="/LevelCard.png"
               alt="會員等級牌卡"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />
           </div>
 
-          {/* 垂直分隔線（兩側各留 40px） */}
-          <div className="self-stretch mx-10" style={{ width: 1, backgroundColor: T.borderLow }} />
+          {/* 垂直分隔線（兩側各 40px 留白） */}
+          <div
+            className="self-stretch mx-10 shrink-0"
+            style={{ width: 1, backgroundColor: T.borderLow }}
+          />
 
           {/* 右側資料 */}
-          <div className="flex-1 flex flex-col gap-3">
-            {/* 總資格保費 */}
+          <div className="flex-1 flex flex-col gap-4">
             <DataRow
               label="總資格保費"
               value={`TWD ${CUSTOMER.totalPremium.toLocaleString("zh-TW")}`}
               valueColor={T.primary}
             />
-            {/* 數位服務指標 */}
             <DataRow
               label="數位服務指標"
               value={`已完成 ${CUSTOMER.digitalServiceDone} 項`}
             />
-            {/* 會員資格取得日 · 預計脫退月（合一行，opacity 60%） */}
             <div
               className="text-[16px]"
               style={{
@@ -550,30 +686,31 @@ function LevelMedalCard() {
               <span style={{ color: T.textDefault, opacity: 1 }}>
                 {CUSTOMER.acquisitionDate}
               </span>
-              ・預計脫退月{" "}
+              ·預計脫退月{" "}
               <span style={{ color: T.textDefault, opacity: 1 }}>
                 {CUSTOMER.retirementMonth}
               </span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 查看服務權益剩餘次數 按鈕列 */}
-      <div
-        className="flex items-center justify-between px-4 py-2 mx-4 mb-4 rounded-[6px]"
-        style={{ backgroundColor: T.bgLight }}
-      >
-        <span
-          className="text-[14px] font-semibold"
-          style={{ color: T.textDefault, fontFamily: "'PingFang TC', sans-serif" }}
+        {/* 查看服務權益剩餘次數（在牌卡與資料兩者下方） */}
+        <div
+          className="flex items-center justify-between px-3 py-2 rounded-[6px]"
+          style={{ backgroundColor: T.bgLight }}
         >
-          查看服務權益剩餘次數
-        </span>
-        <ChevronLeft
-          size={16}
-          style={{ color: T.textMedium, transform: "rotate(180deg)" }}
-        />
+          <span
+            className="text-[14px] font-semibold"
+            style={{ color: T.textDefault, fontFamily: "'PingFang TC', sans-serif" }}
+          >
+            查看服務權益剩餘次數
+          </span>
+          <ChevronLeft
+            size={16}
+            style={{ color: T.textMedium, transform: "rotate(180deg)" }}
+          />
+        </div>
+
       </div>
     </div>
   );
@@ -920,6 +1057,7 @@ export default function CustomerDetailPage() {
           className="flex-1 flex flex-col overflow-hidden"
           style={{ backgroundColor: T.bgLight }}
         >
+
           <CustomerSummaryHeader activeTab={activeTab} onTabChange={setActiveTab} scrolled={scrolled} />
 
           {/* 可滾動內容區 */}
@@ -927,31 +1065,13 @@ export default function CustomerDetailPage() {
             <LevelMedalCard />
             <ProgressCard onCalculate={() => setShowModal(true)} />
 
-            <SectionTable
-              title="服務項目"
-              columns={["服務項目", "狀態", "生效日", "截止日"]}
-              rows={[
-                ["貴賓服務專線", "新戶", "114/12/12", "115/12/31"],
-                ["機場接送", "新戶上月", "114/12/12", "115/12/31"],
-                ["機場貴賓室", "新戶上月", "114/12/12", "115/12/31"],
-                ["核保綠色通關", "新戶上月", "114/12/12", "115/12/31"],
-              ]}
-            />
+            <ServiceBenefitsSection />
 
-            <SectionTable
-              title="歷史紀錄"
-              subtitle="資格保費歷史紀錄"
-              columns={["保單號碼", "商品名稱", "狀態", "年期", "資格保費", "累計資格保費", "生效日"]}
-              rows={[
-                ["12531011", "精選好利", "有效", "10年", "300,000", "4,900,000", "123/11/01"],
-                ["12531021", "精選傑出", "有效", "10年", "300,000", "4,600,000", "123/5/02"],
-                ["12531031", "精選好利", "有效", "6年", "210,000", "4,300,000", "122/8/02"],
-                ["12531041", "精選傑出", "有效", "6年", "210,000", "4,090,000", "122/3/02"],
-                ["12531051", "精選好利", "有效", "3年", "90,000", "3,880,000", "121/11/01"],
-              ]}
-            />
+            <HistorySection />
           </div>
         </div>
+
+        <DrawerBar />
       </div>
 
       {/* 資格保費試算彈窗 */}
@@ -1003,44 +1123,186 @@ function DataRow({
   );
 }
 
-// SectionTable
-function SectionTable({
-  title,
-  subtitle,
-  columns,
-  rows,
-}: {
-  title: string;
-  subtitle?: string;
-  columns: string[];
-  rows: string[][];
-}) {
+// ── 服務權益資料 ─────────────────────────────────────────────
+const SERVICE_BENEFITS = [
+  { service: "會員禮",     status: "剩 1 次", expiry: "116/12/31" },
+  { service: "嚴選好禮",   status: "剩 2 次", expiry: "116/12/31" },
+  { service: "機場接送",   status: "剩 2 次", expiry: "116/12/31" },
+  { service: "機場貴賓室", status: "剩 2 次", expiry: "116/12/31" },
+  { service: "機場頂級通關", status: "剩 2 次", expiry: "116/12/31" },
+];
+
+// ── 歷史紀錄資料 ─────────────────────────────────────────────
+const HISTORY_RECORDS = [
+  { date: "115/01/01", item: "尊榮服務-首年禮", product: "嚴選好禮", count: "1", period: "116/12/31", redeemed: "115/03/02" },
+  { date: "115/01/01", item: "尊榮服務-首年禮", product: "機場接送", count: "1", period: "116/12/31", redeemed: "尚未兌換" },
+  { date: "114/12/01", item: "尊榮服務-首年禮", product: "機場接送", count: "1", period: "115/12/31", redeemed: "尚未兌換" },
+  { date: "114/10/01", item: "尊榮服務-首年禮", product: "機場接送", count: "1", period: "115/12/31", redeemed: "尚未兌換" },
+  { date: "113/10/01", item: "尊榮服務-首年禮", product: "機場接送", count: "1", period: "114/12/31", redeemed: "已過期" },
+];
+
+// ── 區塊標題列（Icon + 標題 + 右側 CTA） ─────────────────────
+function SectionTitleBar({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
-    <div
-      className="rounded-[8px]"
-      style={{ border: `1px solid ${T.borderLow}`, backgroundColor: T.white, overflow: "hidden" }}
-    >
-      <div className="px-5 py-4 flex items-center gap-2">
-        <span className="text-[16px] font-semibold" style={{ color: T.textDefault }}>
+    <>
+      <div className="flex items-center gap-2 px-4 py-3">
+        <div
+          className="flex items-center justify-center rounded-[4px] shrink-0"
+          style={{ width: 28, height: 28, backgroundColor: "rgba(84,159,210,0.16)" }}
+        >
+          <User size={16} style={{ color: T.primary }} />
+        </div>
+        <span
+          className="flex-1 text-[18px] font-semibold"
+          style={{ color: T.textDefault, fontFamily: "'PingFang TC', sans-serif" }}
+        >
           {title}
         </span>
-        {subtitle && (
-          <span className="text-[13px]" style={{ color: T.textMedium }}>
-            {subtitle}
-          </span>
-        )}
+        {action}
       </div>
-      <div style={{ overflowX: "auto" }}>
+      <div style={{ borderTop: `1px solid ${T.borderLow}` }} />
+    </>
+  );
+}
+
+// ── 區塊四：服務權益 ─────────────────────────────────────────
+function ServiceBenefitsSection() {
+  const cols = ["服務項目", "狀態", "到期日"];
+  return (
+    <div
+      className="rounded-[8px] overflow-hidden"
+      style={{ border: `1px solid ${T.borderLow}`, backgroundColor: T.white }}
+    >
+      <SectionTitleBar
+        title="服務權益"
+        action={
+          <button
+            className="h-[32px] px-3 rounded-[6px] text-[14px] font-semibold shrink-0"
+            style={{ border: `1px solid ${T.primary}`, color: T.primary, backgroundColor: T.white }}
+          >
+            分享兌換連結
+          </button>
+        }
+      />
+      {/* 備註 + 表格，四周保留 px-4 pb-4 padding */}
+      <div className="px-4 pb-4 flex flex-col gap-3">
+        <div className="flex items-center gap-1 pt-3">
+          <Info size={16} style={{ color: T.textLow, flexShrink: 0 }} />
+          <span className="text-[14px]" style={{ color: T.textMedium }}>
+            以下項目包含已發放的感恩禮
+          </span>
+        </div>
+        {/* 表格容器（圓角 + 邊框） */}
+        <div
+          className="rounded-[8px] overflow-hidden"
+          style={{ border: `1px solid ${T.borderLow}` }}
+        >
+          <div style={{ overflowX: "auto" }}>
+            <table className="w-full border-collapse text-[14px]">
+              <thead>
+                <tr style={{ backgroundColor: T.bgTableHeader }}>
+                  {cols.map((col, ci) => (
+                    <th
+                      key={col}
+                      className="px-4 py-3 text-left font-semibold whitespace-nowrap"
+                      style={{
+                        color: T.textDark,
+                        borderBottom: `1px solid ${T.borderLow}`,
+                        borderLeft: ci > 0 ? `1px solid ${T.borderDefault}` : undefined,
+                      }}
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {SERVICE_BENEFITS.map((row, ri) => (
+                  <tr
+                    key={ri}
+                    style={{
+                      backgroundColor: ri % 2 === 0 ? T.white : T.bgLight,
+                      borderBottom: `1px solid ${T.borderLow}`,
+                    }}
+                  >
+                    <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault }}>{row.service}</td>
+                    <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{row.status}</td>
+                    <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{row.expiry}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 區塊五：歷史紀錄 ─────────────────────────────────────────
+function HistorySection() {
+  const [activeTab, setActiveTab] = useState(0);
+  const tabs = ["服務取得/使用紀錄", "感恩禮資格歷程"];
+  const cols = ["服務取得日", "項目", "品項", "次數", "服務期限", "兌換日期"];
+
+  return (
+    <div
+      className="rounded-[8px] overflow-hidden"
+      style={{ border: `1px solid ${T.borderLow}`, backgroundColor: T.white }}
+    >
+      <SectionTitleBar title="歷史紀錄" />
+      {/* Tab、備註、表格，四周保留 px-4 pb-4 padding */}
+      <div className="px-4 pb-4 flex flex-col gap-3">
+        {/* Tab 切換器 */}
+        <div className="flex items-center pt-3">
+          <div
+            className="flex items-center p-[2px] rounded-[6px]"
+            style={{ border: `1px solid ${T.borderDefault}` }}
+          >
+            {tabs.map((tab, i) => (
+              <button
+                key={tab}
+                className="h-[32px] px-5 rounded-[6px] text-[14px] font-semibold whitespace-nowrap"
+                style={{
+                  backgroundColor: activeTab === i ? T.primary : "transparent",
+                  color: activeTab === i ? T.white : T.textMedium,
+                  fontFamily: "'PingFang TC', sans-serif",
+                  transition: "background-color 0.15s ease",
+                }}
+                onClick={() => setActiveTab(i)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* 備註（灰底） */}
+        <div
+          className="flex items-center gap-1 px-3 py-2 rounded-[6px]"
+          style={{ backgroundColor: T.bgPaleGrey }}
+        >
+          <Info size={16} style={{ color: T.textLow, flexShrink: 0 }} />
+          <span className="text-[14px]" style={{ color: T.textMedium }}>
+            最近更新時間：YYY/MM/DD
+          </span>
+        </div>
+        {/* 表格容器（圓角 + 邊框） */}
+        <div
+          className="rounded-[8px] overflow-hidden"
+          style={{ border: `1px solid ${T.borderLow}` }}
+        >
+        <div style={{ overflowX: "auto" }}>
         <table className="w-full border-collapse text-[14px]">
           <thead>
             <tr style={{ backgroundColor: T.bgTableHeader }}>
-              {columns.map((col) => (
+              {cols.map((col, ci) => (
                 <th
                   key={col}
-                  className="px-4 py-2 text-left font-semibold whitespace-nowrap"
+                  className="px-4 py-3 text-left font-semibold whitespace-nowrap"
                   style={{
                     color: T.textDark,
                     borderBottom: `1px solid ${T.borderLow}`,
+                    borderLeft: ci > 0 ? `1px solid ${T.borderDefault}` : undefined,
                   }}
                 >
                   {col}
@@ -1049,7 +1311,7 @@ function SectionTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, ri) => (
+            {HISTORY_RECORDS.map((row, ri) => (
               <tr
                 key={ri}
                 style={{
@@ -1057,19 +1319,18 @@ function SectionTable({
                   borderBottom: `1px solid ${T.borderLow}`,
                 }}
               >
-                {row.map((cell, ci) => (
-                  <td
-                    key={ci}
-                    className="px-4 py-2 whitespace-nowrap"
-                    style={{ color: T.textDefault }}
-                  >
-                    {cell}
-                  </td>
-                ))}
+                <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault }}>{row.date}</td>
+                <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{row.item}</td>
+                <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{row.product}</td>
+                <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{row.count}</td>
+                <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{row.period}</td>
+                <td className="px-4 py-2 whitespace-nowrap" style={{ color: T.textDefault, borderLeft: `1px solid ${T.borderDefault}` }}>{row.redeemed}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
+        </div>
       </div>
     </div>
   );
