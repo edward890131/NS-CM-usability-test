@@ -95,27 +95,25 @@ const sideMenuItems = [
 
 // ── Mock 客戶資料 ───────────────────────────────────────────
 const CUSTOMER = {
-  name: "王南山",
+  name: "陳雅雲",
   tags: [
-    { label: "產", color: "#004f85" },
     { label: "安", color: "#00a069" },
     { label: "加費", color: "#696969" },
-    { label: "批註", color: "#696969" },
   ],
-  subtitle: "男性・保險年齡 38 歲 (45 日後增齡)",
+  subtitle: "女性・保險年齡 34 歲",
   grade: "A級",
   familyMembers: "2人",
-  birthday: "79/12/30",
+  birthday: "81/05/28",
   wealthLevel: "R1、C1",
-  phone: "0912444032",
+  phone: "0934567890",
   vipQualification: "尊榮3星",
   vipQualification2: "白金VIP",
   membership: "尊榮3星",
-  totalPremium: 3900000,
+  totalPremium: 4990000,
   digitalServiceDone: 1,
   acquisitionDate: "114/12/12",
   retirementMonth: "115/12",
-  upgradePremium: 3900000,
+  upgradePremium: 4990000,
   gratitudePremium: 800000,
 };
 
