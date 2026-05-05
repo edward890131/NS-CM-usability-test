@@ -53,17 +53,16 @@ const SIDE_ACTIVE = "所有客戶";
 
 // ── Drawer Bar 圖片資源（Figma assets，7 天後需更換為本地 SVG） ──
 const DRAWER_ASSETS = {
-  zhaoHui:      "https://www.figma.com/api/mcp/asset/02f35120-8bde-40db-80de-51ae06e2b3e9",
-  zhaoHuiInner: "https://www.figma.com/api/mcp/asset/6ee40c8e-2262-4747-9cb8-75a8ba335497",
-  bell:         "https://www.figma.com/api/mcp/asset/87a8ac1d-dc1a-4cda-9923-7e43985535bc",
-  calendar:     "https://www.figma.com/api/mcp/asset/2ea7e90b-88d1-4ed9-a3c5-b73d5068f355",
-  sales:        "https://www.figma.com/api/mcp/asset/55f3a89e-7ee0-4a43-8b3f-b866d4aeeb0d",
-  detail:       "https://www.figma.com/api/mcp/asset/2d971fa7-6daa-4a7c-921b-b49c86ccf36a",
-  toSign:       "https://www.figma.com/api/mcp/asset/86051ad2-83fd-4e60-bab5-ef7d064a2f00",
-  question:     "https://www.figma.com/api/mcp/asset/fc7412e5-62df-4227-86ce-691de1625a01",
-  schedule:     "https://www.figma.com/api/mcp/asset/2ea7e90b-88d1-4ed9-a3c5-b73d5068f355",
-  apps:         "https://www.figma.com/api/mcp/asset/892cb249-39bd-4ac4-a27f-1d355528dc6a",
-  move:         "https://www.figma.com/api/mcp/asset/81e0753b-3cfa-4acd-bb01-e172776074c8",
+  zhaoHui:  "/icons/drawer/drawer-zhao-hui.png",
+  bell:     "/icons/drawer/drawer-bell.png",
+  calendar: "/icons/drawer/drawer-calendar.png",
+  sales:    "/icons/drawer/drawer-sales.png",
+  detail:   "/icons/drawer/drawer-detail.png",
+  toSign:   "/icons/drawer/drawer-to-sign.png",
+  question: "/icons/drawer/drawer-question.png",
+  schedule: "/icons/drawer/drawer-calendar.png",
+  apps:     "/icons/drawer/drawer-apps.png",
+  move:     "/icons/drawer/drawer-move.png",
 };
 
 // ── 頂部導覽 ────────────────────────────────────────────────
@@ -307,32 +306,12 @@ function DrawerBar() {
       className="shrink-0 flex flex-col h-full"
       style={{ width: 56, backgroundColor: T.white, borderLeft: `1px solid ${T.borderLow}`, paddingTop: 20 }}
     >
-      {/* 照會（含紅色角標） */}
+      {/* 照會（含紅色角標，PNG 已內含） */}
       <button
         className="flex items-center justify-center shrink-0"
         style={{ height: 48, width: 56 }}
       >
-        <div style={{ position: "relative", width: 22, height: 22 }}>
-          {/* 底層圖示 */}
-          <img
-            src={DRAWER_ASSETS.zhaoHui}
-            alt="照會"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-          />
-          {/* 內層圖示 */}
-          <div style={{ position: "absolute", inset: "12.5% 11.88% 11.59% 10.42%" }}>
-            <img src={DRAWER_ASSETS.zhaoHuiInner} alt="" style={{ width: "100%", height: "100%" }} />
-          </div>
-          {/* 紅色角標 */}
-          <div
-            style={{
-              position: "absolute", top: -2, right: -2,
-              width: 7, height: 7, borderRadius: "50%",
-              backgroundColor: "#e53e3e",
-              border: `1.5px solid ${T.white}`,
-            }}
-          />
-        </div>
+        <img src={DRAWER_ASSETS.zhaoHui} alt="照會" style={{ width: 22, height: 22 }} />
       </button>
 
       {/* 其他 icon 按鈕 */}
@@ -664,7 +643,7 @@ function LevelMedalCard() {
           {/* 右側資料 */}
           <div className="flex-1 flex flex-col gap-4">
             <DataRow
-              label="總資格保費"
+              label="目前資格保費"
               value={`TWD ${CUSTOMER.totalPremium.toLocaleString("zh-TW")}`}
               valueColor={T.primary}
             />
@@ -851,7 +830,7 @@ function ProgressCard({ onCalculate }: { onCalculate: () => void }) {
         <div className="flex flex-col gap-4 relative">
           {/* 資格保費試算按鈕（右上角） */}
           <button
-            className="absolute right-0 top-0 h-[32px] px-3 rounded-[6px] text-[14px] font-semibold"
+            className="absolute right-0 h-[32px] px-3 rounded-[6px] text-[14px] font-semibold"
             style={{
               backgroundColor: T.primary,
               color: T.white,

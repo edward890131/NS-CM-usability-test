@@ -820,7 +820,7 @@ function InputView({
         }}
         onClick={onAddPolicy}
       >
-        + 新增主約
+        + 新增下一個主約
       </button>
     </div>
   );
